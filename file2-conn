@@ -1,0 +1,22 @@
+# Import pyodbc module
+import pyodbc
+
+# Define the connection parameters
+server = 'Chin2'
+database = 'master'
+
+# Create a connection string using windows authentication
+connection_string = f'Driver={{SQL Server}};Server={server};Database={database};Trusted_Connection=yes;'
+
+# Try to connect to the SQL Server and print a message
+try:
+    # Create a connection object
+    conn = pyodbc.connect(connection_string)
+    # Print a success message
+    print('Connected to SQL Server successfully.')
+    # Close the connection
+    conn.close()
+except Exception as e:
+    # Print an error message
+    print('Failed to connect to SQL Server.')
+    print(e)
