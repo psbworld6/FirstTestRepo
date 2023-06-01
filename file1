@@ -1,74 +1,85 @@
-import pandas as pd
-import openpyxl
 import pyodbc
-from openpyxl.utils.dataframe import dataframe_to_rows
-from datetime import timedelta
+import pandas as pd
 from dateutil import rrule
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
 
-# Define the start and end date ranges
-start_date_range = pd.to_datetime('2022-08-01')
-end_date_range = pd.to_datetime('2022-12-31')
-
-# SQL Server connection details
+# Set up the connection string
 server_name = 'chin2'
-database_name = 'HomeDB'
-stored_procedure = 'sample_procedure'
+db_name = 'HomeDB'
+connection_string = f'DRIVER={{SQL Server}};SERVER={server_name};DATABASE={db_name};Trusted_Connection=yes;'
 
-# Establish a connection to the SQL Server
-connection = pyodbc.connect('DRIVER={SQL Server};SERVER=' + server_name + ';DATABASE=' + database_name + ';Trusted_Connection=yes;')
+# Establish the database connection
+connection = pyodbc.connect(connection_string)
 
 try:
-    # Create an empty DataFrame to store the results
-    df = pd.DataFrame()
+    # Create a cursor object to interact with the database
+    cursor = connection.cursor()
 
-    # Loop through the date range for each month
-    for dt in rrule.rrule(rrule.MONTHLY, dtstart=start_date_range, until=end_date_range + timedelta(days=1)):
+    # Define the stored procedure execution query
+    stored_procedure = 'EXEC sample_procedure @date=?'
+
+    # Define the date range
+    start_date = pd.to_datetime('2022-01-01')
+    end_date = pd.to_datetime('2023-03-31')
+
+    # Iterate over each month in the range
+    for dt in rrule.rrule(rrule.MONTHLY, dtstart=start_date, until=end_date):
         # Get the start and end dates for the current month
         month_start = dt.replace(day=1)
         month_end = month_start.replace(day=pd.to_datetime(month_start).days_in_month)
 
-        # Execute the stored procedure for each day in the current month
-        for day in rrule.rrule(rrule.DAILY, dtstart=month_start, until=month_end + timedelta(days=1)):
-            # Format the date as a string
+        # Create a DataFrame to store the results
+        df = pd.DataFrame()
+
+        # Iterate over each day in the current month
+        for day in rrule.rrule(rrule.DAILY, dtstart=month_start, until=month_end):
+            # Format the date as YYYY-MM-DD
             date_str = day.strftime('%Y-%m-%d')
 
-            # Execute the stored procedure with the current date as a parameter
-            cursor = connection.cursor()
-            cursor.execute(f"EXEC {stored_procedure} @date='{date_str}'")
+            # Set the parameter value
+            date_parameter = date_str
 
-            # Fetch the results
+            # Execute the stored procedure
+            cursor.execute(stored_procedure, date_parameter)
+
+            # Fetch all the rows returned by the stored procedure
             results = cursor.fetchall()
 
-            # Create a DataFrame from the fetched results
-            df_temp = pd.DataFrame(results)
+            if results:
+                # Convert the results to a list of strings
+                results_strings = [tuple(str(value) for value in row) for row in results]
 
-            # Add a 'Date' column to the DataFrame
-            df_temp['Date'] = day.date()
+                # Create a DataFrame with the fetched results
+                df_temp = pd.DataFrame(results_strings, columns=[column[0] for column in cursor.description])
 
-            # Concatenate the temporary DataFrame to the main DataFrame
-            df = pd.concat([df, df_temp], ignore_index=True)
-
-            # Close the cursor
-            cursor.close()
+                # Concatenate the temporary DataFrame to the main DataFrame
+                df = pd.concat([df, df_temp], ignore_index=True)
 
         # Create a new workbook
-        workbook = openpyxl.Workbook()
+        workbook = Workbook()
 
         # Create a sheet in the workbook with the month and year as the name
         sheet = workbook.active
-        sheet.title = dt.strftime("%B%Y")
+        sheet.title = dt.strftime('%B%Y')
 
         # Write the DataFrame to the sheet
         for r in dataframe_to_rows(df, index=False, header=True):
             sheet.append(r)
 
-        # Save the workbook with the month and year as the filename
-        filename = dt.strftime("%B%Y") + '.xlsx'
-        workbook.save(filename)
+        # Specify the Excel file path with the month and year
+        excel_file_path = dt.strftime('%B%Y') + '.xlsx'
 
-        # Clear the DataFrame for the next month's data
-        df = pd.DataFrame()
+        # Save the workbook to Excel
+        workbook.save(excel_file_path)
+
+        print(f'Data saved to {excel_file_path} successfully.')
+
+except pyodbc.Error as e:
+    # Handle any errors that may occur during execution
+    print('Error executing stored procedure:', str(e))
 
 finally:
-    # Close the connection
+    # Close the cursor and connection
+    cursor.close()
     connection.close()
