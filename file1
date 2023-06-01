@@ -1,1 +1,78 @@
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.utils.dataframe import dataframe_to_rows
+import pyodbc
+from datetime import timedelta
 
+# Define the SQL Server connection details
+server = 'chin2'
+database = 'HomeDB'
+conn_str = f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};Trusted_Connection=yes;'
+
+# Define the start and end date range for the desired months
+start_date_range = pd.to_datetime('2022-08-01')
+end_date_range = pd.to_datetime('2022-12-31')
+
+# Connect to the SQL Server
+conn = pyodbc.connect(conn_str)
+cursor = conn.cursor()
+
+# Create an empty DataFrame to store the results
+df = pd.DataFrame(columns=['Column1', 'Column2', 'Column3', 'Date'])
+
+try:
+    # Loop through the date range for each month
+    for dt in pd.date_range(start=start_date_range, end=end_date_range, freq='D'):
+        # Extract the date components
+        year = dt.year
+        month = dt.month
+        day = dt.day
+
+        # Execute the stored procedure with the current date as the parameter
+        query = f"EXEC sample_procedure '{year}-{month:02d}-{day:02d}'"
+        cursor.execute(query)
+
+        # Fetch the results
+        results = cursor.fetchall()
+
+        # Create a DataFrame from the fetched results
+        df_temp = pd.DataFrame(results, columns=['Column1', 'Column2', 'Column3'])
+        df_temp['Date'] = dt.date()
+
+        # Append the current day's data to the main DataFrame
+        df = df.append(df_temp, ignore_index=True)
+
+finally:
+    # Close the cursor and connection
+    cursor.close()
+    conn.close()
+
+# Create a new workbook for each month and save the data
+for month_start in pd.date_range(start=start_date_range, end=end_date_range, freq='MS'):
+    # Get the month and year for the file name
+    month_year_str = month_start.strftime("%B%Y")
+
+    # Filter the data frame for the current month
+    month_end = month_start + pd.offsets.MonthEnd()
+    filtered_df = df[(df['Date'] >= month_start) & (df['Date'] <= month_end)]
+
+    # Check if there is data for the current month
+    if not filtered_df.empty:
+        # Create a new workbook
+        workbook = Workbook()
+
+        # Create a sheet in the workbook with the month and year as the name
+        sheet = workbook.active
+        sheet.title = month_year_str
+
+        # Write the filtered DataFrame to the sheet
+        for row in dataframe_to_rows(filtered_df, index=False, header=True):
+            sheet.append(row)
+
+        # Save the workbook to Excel
+        excel_file_path = f'output_{month_year_str}.xlsx'
+        workbook.save(excel_file_path)
+
+        print(f'Data for {month_year_str} saved to {excel_file_path} successfully.')
+    else:
+        print(f'No data found for {month_year_str}.')
