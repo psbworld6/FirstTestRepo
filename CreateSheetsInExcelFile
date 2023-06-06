@@ -1,0 +1,28 @@
+from openpyxl import load_workbook
+import os
+
+# Define the directory where the Excel files are located
+directory = 'path/to/excel/files'
+
+# Iterate over each file in the directory
+for filename in os.listdir(directory):
+    if filename.endswith(".xlsx"):
+        # Load the Excel file
+        file_path = os.path.join(directory, filename)
+        workbook = load_workbook(file_path)
+
+        # Create two sheets at the start of the workbook
+        sheet_names = ["Script", "Consolidated Test Report"]
+        for sheet_name in sheet_names:
+            workbook.create_sheet(sheet_name, 0)
+
+        # Remove the default sheet created by openpyxl
+        default_sheet = workbook["Sheet"]
+        workbook.remove(default_sheet)
+
+        # Save the modified workbook
+        workbook.save(file_path)
+
+        print(f"Added 'Script' and 'Consolidated Test Report' sheets to {filename}")
+
+print("All files updated successfully.")
