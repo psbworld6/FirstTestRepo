@@ -37,7 +37,6 @@ for filename in os.listdir(directory):
                         new_cell.font = Font.from_tuple(cell.font)
                         new_cell.fill = PatternFill.from_tuple(cell.fill)
                         new_cell.border = Border.from_tuple(cell.border)
-                        new_cell.alignment = Alignment.from_tuple(cell.alignment)
                         new_cell.number_format = cell.number_format
 
             # Resize the rows to fit the content
@@ -48,7 +47,7 @@ for filename in os.listdir(directory):
             # Align cells to the left
             for row in new_sheet.iter_rows(min_row=1, max_row=new_sheet.max_row, min_col=1, max_col=new_sheet.max_column):
                 for cell in row:
-                    cell.alignment = Alignment(horizontal="left")
+                    cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
 
             # Rename the new sheet to the file name
             new_sheet.title = filename
@@ -60,4 +59,3 @@ consolidated_file_path = os.path.join(directory, "consolidated_reports.xlsx")
 consolidated_workbook.save(consolidated_file_path)
 
 print(f"Consolidated sheets saved to {consolidated_file_path}.")
-
