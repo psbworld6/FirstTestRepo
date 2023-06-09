@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 import openpyxl
+from openpyxl.styles import Alignment
 
 # Directory path where the excel files are located
 directory_path = "path/to/directory"
@@ -32,11 +33,13 @@ for filename in os.listdir(directory_path):
             for row in source_sheet.iter_rows():
                 for cell in row:
                     new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+                    new_cell.alignment = Alignment(horizontal=cell.alignment.horizontal, vertical=cell.alignment.vertical,
+                                                   text_rotation=cell.alignment.text_rotation, wrap_text=cell.alignment.wrap_text,
+                                                   shrink_to_fit=cell.alignment.shrink_to_fit, indent=cell.alignment.indent)
                     new_cell.font = cell.font
                     new_cell.border = cell.border
                     new_cell.fill = cell.fill
                     new_cell.number_format = cell.number_format
-                    new_cell.alignment = cell.alignment
                     new_cell.protection = cell.protection
 
             # Adjust row height to fit content
