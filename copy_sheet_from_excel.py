@@ -39,15 +39,15 @@ for filename in os.listdir(directory):
                         new_cell.border = Border.from_tuple(cell.border)
                         new_cell.number_format = cell.number_format
 
-            # Resize the rows to fit the content
-            for row in new_sheet.iter_rows(min_row=1, max_row=new_sheet.max_row):
-                for cell in row:
-                    new_sheet.row_dimensions[cell.row].height = source_sheet.row_dimensions[cell.row].height
-
-            # Align cells to the left
-            for row in new_sheet.iter_rows(min_row=1, max_row=new_sheet.max_row, min_col=1, max_col=new_sheet.max_column):
-                for cell in row:
-                    cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+                    # Copy the cell's alignment
+                    if cell.alignment:
+                        new_cell.alignment = Alignment(
+                            horizontal=cell.alignment.horizontal,
+                            vertical=cell.alignment.vertical,
+                            wrap_text=cell.alignment.wrap_text,
+                            shrink_to_fit=cell.alignment.shrink_to_fit,
+                            indent=cell.alignment.indent,
+                        )
 
             # Rename the new sheet to the file name
             new_sheet.title = filename
