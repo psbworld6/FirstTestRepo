@@ -1,6 +1,7 @@
 import os
 from openpyxl import load_workbook
 from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 
 # Get the directory path where the Excel files are located
 directory = '/path/to/excel/files'  # Replace with the actual directory path
@@ -23,9 +24,21 @@ for filename in os.listdir(directory):
             # Create a new sheet in the consolidated workbook
             new_sheet = consolidated_workbook.create_sheet(title=filename)
 
-            # Copy the contents from the source sheet to the new sheet
-            for row in source_sheet.iter_rows(values_only=True):
-                new_sheet.append(row)
+            # Copy the sheet with formatting
+            new_sheet.sheet_format = source_sheet.sheet_format
+            new_sheet.sheet_properties.tabColor = source_sheet.sheet_properties.tabColor
+
+            for row in source_sheet.iter_rows(min_row=1, max_row=source_sheet.max_row, min_col=1, max_col=source_sheet.max_column):
+                for cell in row:
+                    new_cell = new_sheet[cell.coordinate]
+                    new_cell.data_type = cell.data_type
+                    new_cell.value = cell.value
+                    if cell.has_style:
+                        new_cell.font = cell.font
+                        new_cell.fill = cell.fill
+                        new_cell.border = cell.border
+                        new_cell.alignment = cell.alignment
+                        new_cell.number_format = cell.number_format
 
             # Rename the new sheet to the file name
             new_sheet.title = filename
