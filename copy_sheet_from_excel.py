@@ -27,12 +27,14 @@ for filename in os.listdir(directory_path):
             new_sheet = consolidated_workbook.create_sheet(title=month_year_formatted)
 
             # Copy the sheet contents and formatting
-            for row in source_sheet.iter_rows(values_only=True):
-                new_sheet.append(row)
-                for cell in new_sheet[-1]:
-                    source_cell = source_sheet.cell(row=cell.row, column=cell.column)
-                    cell.alignment = copy.copy(source_cell.alignment)
-                    cell.font = copy.copy(source_cell.font)
+            for row in source_sheet.iter_rows():
+                new_row = []
+                for cell in row:
+                    new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
+                    new_cell.alignment = copy.copy(cell.alignment)
+                    new_cell.font = copy.copy(cell.font)
+                    new_row.append(new_cell)
+                new_sheet.append(new_row)
 
             # Adjust row height to fit content
             for row in new_sheet.iter_rows():
