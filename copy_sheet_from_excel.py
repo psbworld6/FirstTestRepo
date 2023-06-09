@@ -1,16 +1,12 @@
 import os
 from openpyxl import load_workbook
-from openpyxl import Workbook
+from openpyxl.styles import Alignment
 
 # Get the directory path where the Excel files are located
 directory = '/path/to/excel/files'  # Replace with the actual directory path
 
 # Create a new workbook to store the consolidated sheets
-consolidated_workbook = Workbook()
-
-# Create the destination sheet in the consolidated workbook
-consolidated_sheet = consolidated_workbook.active
-consolidated_sheet.title = 'Consolidated Test Report'
+consolidated_workbook = None
 
 # Iterate over each file in the directory
 for filename in os.listdir(directory):
@@ -24,12 +20,22 @@ for filename in os.listdir(directory):
             # Get the reference to the source sheet
             source_sheet = workbook["Consolidated Test File"]
 
-            # Copy the sheet with formatting and alignment
+            # Copy the sheet to the consolidated workbook
+            if consolidated_workbook is None:
+                consolidated_workbook = Workbook()
+                consolidated_sheet = consolidated_workbook.active
+                consolidated_sheet.title = filename
+            else:
+                consolidated_sheet = consolidated_workbook.create_sheet(title=filename)
+
+            # Copy the cell values and formatting
             for row in source_sheet.iter_rows(values_only=True):
                 consolidated_sheet.append(row)
 
-            # Rename the sheet to the file name
-            consolidated_sheet.title = filename
+            # Apply alignment to the cells in the consolidated sheet
+            for row in consolidated_sheet.iter_rows():
+                for cell in row:
+                    cell.alignment = Alignment(horizontal='left')
 
 print("Copying and renaming sheets completed.")
 
