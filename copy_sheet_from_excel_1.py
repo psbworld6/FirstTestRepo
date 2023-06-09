@@ -47,39 +47,37 @@ for filename in os.listdir(directory_path):
                 for cell in row:
                     new_sheet.row_dimensions[cell.row].height = source_sheet.row_dimensions[cell.row].height
 
-            # Align cells to the left
-            for column in new_sheet.columns:
-                for cell in column:
-                    cell.alignment = cell.alignment.copy(horizontal="left")
-
             # Adjust column width to fit content
             for column in new_sheet.columns:
                 max_length = 0
                 column_letter = column[0].column_letter
                 for cell in column:
                     if cell.value:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(cell.value)
-                adjusted_width = (max_length + 2) * 1.2  # Adjust the multiplier as needed
+                        cell_length = len(str(cell.value))
+                        if cell_length > max_length:
+                            max_length = cell_length
+                adjusted_width = (max_length + 2) * 1.2
                 new_sheet.column_dimensions[column_letter].width = adjusted_width
+
+            # Align cells to the left
+            for column in new_sheet.columns:
+                for cell in column:
+                    cell.alignment = cell.alignment.copy(horizontal="left")
 
             # Close the source workbook
             source_workbook.close()
 
-                      # Add the sheet name to the list
+            # Add the sheet name to the list
             sheet_names.append(month_year_formatted)
-
         except ValueError:
             continue
 
-# Sort the sheet names based on the month and year
-sorted_sheet_names = sorted(sheet_names, key=lambda x: datetime.strptime(x, '%B%Y'))
+# Sort the sheet names in ascending order
+sorted_sheet_names = sorted(sheet_names, key=lambda x: datetime.strptime(x, "%B%Y"))
 
-# Rearrange the sheets in the consolidated workbook based on the sorted order
+# Reorder the sheets in the consolidated workbook based on the sorted sheet names
 consolidated_workbook._sheets = [consolidated_workbook[sheet_name] for sheet_name in sorted_sheet_names]
 
 # Save the consolidated workbook
 consolidated_workbook.save(os.path.join(directory_path, "consolidated_reports.xlsx"))
 consolidated_workbook.close()
-
-
