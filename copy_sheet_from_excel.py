@@ -25,7 +25,7 @@ for filename in os.listdir(directory_path):
             # Create a new sheet in the consolidated workbook
             new_sheet = consolidated_workbook.create_sheet(title=month_year_formatted)
 
-            # Copy the sheet contents along with formatting
+            # Copy the sheet contents
             for row in source_sheet.iter_rows(values_only=True):
                 new_sheet.append(row)
 
@@ -33,14 +33,9 @@ for filename in os.listdir(directory_path):
             for row in source_sheet.iter_rows():
                 for cell in row:
                     new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
-                    new_cell.alignment = Alignment(horizontal=cell.alignment.horizontal, vertical=cell.alignment.vertical,
-                                                   text_rotation=cell.alignment.text_rotation, wrap_text=cell.alignment.wrap_text,
-                                                   shrink_to_fit=cell.alignment.shrink_to_fit, indent=cell.alignment.indent)
-                    new_cell.font = cell.font
-                    new_cell.border = cell.border
-                    new_cell.fill = cell.fill
-                    new_cell.number_format = cell.number_format
-                    new_cell.protection = cell.protection
+                    new_cell.alignment = Alignment(
+                        **cell.alignment.__dict__
+                    )  # Create a new Alignment object with the same attributes
 
             # Adjust row height to fit content
             for row in new_sheet.iter_rows():
