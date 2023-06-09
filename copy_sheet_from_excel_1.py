@@ -76,9 +76,10 @@ for filename in os.listdir(directory_path):
 sorted_sheet_names = sorted(sheet_names, key=lambda x: datetime.strptime(x, '%B%Y'))
 
 # Rearrange the sheets in the consolidated workbook based on the sorted order
-consolidated_workbook._sheets.sort(key=lambda x: sorted_sheet_names.index(x.title))
+consolidated_workbook._sheets = [consolidated_workbook[sheet_name] for sheet_name in sorted_sheet_names]
 
 # Save the consolidated workbook
 consolidated_workbook.save(os.path.join(directory_path, "consolidated_reports.xlsx"))
 consolidated_workbook.close()
+
 
