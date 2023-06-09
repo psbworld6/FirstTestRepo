@@ -1,8 +1,12 @@
 import os
 from openpyxl import load_workbook
+from openpyxl import Workbook
 
 # Get the directory path where the Excel files are located
 directory = '/path/to/excel/files'  # Replace with the actual directory path
+
+# Create a new workbook to store the consolidated sheets
+consolidated_workbook = Workbook()
 
 # Iterate over each file in the directory
 for filename in os.listdir(directory):
@@ -16,17 +20,20 @@ for filename in os.listdir(directory):
             # Get the reference to the source sheet
             source_sheet = workbook["Consolidated Test File"]
 
-            # Create a new sheet with the file name
-            new_sheet_name = os.path.splitext(filename)[0]
-            new_sheet = workbook.create_sheet(title=new_sheet_name)
+            # Create a new sheet in the consolidated workbook
+            new_sheet = consolidated_workbook.create_sheet(title=filename)
 
             # Copy the contents from the source sheet to the new sheet
             for row in source_sheet.iter_rows(values_only=True):
                 new_sheet.append(row)
 
-        # Save the modified workbook back to the file
-        workbook.save(file_path)
+            # Rename the new sheet to the file name
+            new_sheet.title = filename
 
-        print(f"Sheet 'Consolidated Test File' copied and renamed in {filename}")
+print("Copying and renaming sheets completed.")
 
-print("All files processed successfully.")
+# Save the consolidated workbook to a new file
+consolidated_file_path = os.path.join(directory, "consolidated_reports.xlsx")
+consolidated_workbook.save(consolidated_file_path)
+
+print(f"Consolidated sheets saved to {consolidated_file_path}.")
