@@ -1,42 +1,55 @@
 import os
 from openpyxl import load_workbook
-from openpyxl.styles import Alignment
 from openpyxl import Workbook
+from datetime import datetime
 
-# Get the directory path where the Excel files are located
-directory = '/path/to/excel/files'  # Replace with the actual directory path
+# Directory path containing the Excel files
+directory_path = 'path/to/directory'  # Replace with the actual directory path
 
-# Create a new workbook to store the consolidated sheets
+# Destination file path
+destination_file_path = 'path/to/destination/file.xlsx'  # Replace with the actual destination file path
+
+# Create a new workbook for the consolidated reports
 consolidated_workbook = Workbook()
 
-# Iterate over each file in the directory
-for filename in os.listdir(directory):
+# Create a list to store the file paths and their corresponding month and year
+file_info_list = []
+
+# Iterate over the files in the directory
+for filename in os.listdir(directory_path):
     if filename.endswith(".xlsx"):
-        # Load the Excel file
-        file_path = os.path.join(directory, filename)
-        workbook = load_workbook(file_path)
+        file_path = os.path.join(directory_path, filename)
+        
+        # Get the month and year information from the file name
+        month_year = datetime.strptime(filename.split('.')[0], '%B%Y')
 
-        # Check if the "Consolidated Test File" sheet exists
-        if "Consolidated Test File" in workbook.sheetnames:
-            # Get the reference to the source sheet
-            source_sheet = workbook["Consolidated Test File"]
+        # Add the file path and its corresponding month and year to the list
+        file_info_list.append((file_path, month_year))
 
-            # Create a new sheet in the consolidated workbook with the filename
-            consolidated_sheet = consolidated_workbook.create_sheet(title=filename)
+# Sort the file paths based on the month and year
+sorted_file_info_list = sorted(file_info_list, key=lambda x: x[1])
 
-            # Copy the cell values and formatting
-            for row in source_sheet.iter_rows(values_only=True):
-                consolidated_sheet.append(row)
+# Iterate over the sorted file paths
+for file_path, month_year in sorted_file_info_list:
+    # Load the source workbook
+    source_workbook = load_workbook(file_path, read_only=True)
 
-            # Apply alignment to the cells in the consolidated sheet
-            for row in consolidated_sheet.iter_rows():
-                for cell in row:
-                    cell.alignment = Alignment(horizontal='left')
+    # Check if the "Consolidated Test Report" sheet exists
+    if "Consolidated Test Report" in source_workbook.sheetnames:
+        # Get the source sheet
+        source_sheet = source_workbook["Consolidated Test Report"]
 
-print("Copying and renaming sheets completed.")
+        # Create a new sheet in the consolidated workbook with the renamed sheet
+        destination_sheet = consolidated_workbook.create_sheet(title=month_year.strftime('%B%Y'))
 
-# Save the consolidated workbook to a new file
-consolidated_file_path = os.path.join(directory, "consolidated_reports.xlsx")
-consolidated_workbook.save(consolidated_file_path)
+        # Copy the cell values and formatting from source sheet to destination sheet
+        for row in source_sheet.iter_rows(values_only=True):
+            destination_sheet.append(row)
 
-print(f"Consolidated sheets saved to {consolidated_file_path}.")
+# Remove the default sheet created in the consolidated workbook
+consolidated_workbook.remove(consolidated_workbook.active)
+
+# Save the consolidated workbook with the copied and renamed sheets
+consolidated_workbook.save(destination_file_path)
+
+print('Sheets copied and renamed successfully. Consolidated file created.')
