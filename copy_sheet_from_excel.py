@@ -1,6 +1,7 @@
 import os
 from openpyxl import load_workbook
 from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Border, Alignment
 from openpyxl.utils import get_column_letter
 
 # Get the directory path where the Excel files are located
@@ -25,19 +26,18 @@ for filename in os.listdir(directory):
             new_sheet = consolidated_workbook.create_sheet(title=filename)
 
             # Copy the sheet with formatting
-            new_sheet.sheet_format = source_sheet.sheet_format
-            new_sheet.sheet_properties.tabColor = source_sheet.sheet_properties.tabColor
-
             for row in source_sheet.iter_rows(min_row=1, max_row=source_sheet.max_row, min_col=1, max_col=source_sheet.max_column):
                 for cell in row:
                     new_cell = new_sheet[cell.coordinate]
                     new_cell.data_type = cell.data_type
                     new_cell.value = cell.value
+
+                    # Copy the cell's style
                     if cell.has_style:
-                        new_cell.font = cell.font
-                        new_cell.fill = cell.fill
-                        new_cell.border = cell.border
-                        new_cell.alignment = cell.alignment
+                        new_cell.font = Font.from_tuple(cell.font)
+                        new_cell.fill = PatternFill(start_color=cell.fill.start_color, end_color=cell.fill.end_color, fill_type=cell.fill.fill_type)
+                        new_cell.border = Border.from_dict(cell.border)
+                        new_cell.alignment = Alignment.from_dict(cell.alignment)
                         new_cell.number_format = cell.number_format
 
             # Rename the new sheet to the file name
