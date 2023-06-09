@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 import openpyxl
-from openpyxl.styles import Alignment
+from openpyxl.styles import Alignment, Font
 import copy
 
 # Directory path where the excel files are located
@@ -26,16 +26,18 @@ for filename in os.listdir(directory_path):
             # Create a new sheet in the consolidated workbook
             new_sheet = consolidated_workbook.create_sheet(title=month_year_formatted)
 
-            # Copy the sheet contents
+            # Copy the sheet contents and formatting
             for row in source_sheet.iter_rows(values_only=True):
                 new_sheet.append(row)
 
-            # Copy the sheet formatting
-            for row in source_sheet.iter_rows():
-                for cell in row:
-                    new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
-                    new_cell.alignment = copy.copy(cell.alignment)
-                    new_cell.font = copy.copy(cell.font)
+            for source_row, new_row in zip(source_sheet.iter_rows(), new_sheet.iter_rows()):
+                for source_cell, new_cell in zip(source_row, new_row):
+                    new_cell.font = copy.copy(source_cell.font)
+                    new_cell.border = copy.copy(source_cell.border)
+                    new_cell.fill = copy.copy(source_cell.fill)
+                    new_cell.number_format = copy.copy(source_cell.number_format)
+                    new_cell.alignment = copy.copy(source_cell.alignment)
+                    new_cell.value = source_cell.value
 
             # Adjust row height to fit content
             for row in new_sheet.iter_rows():
