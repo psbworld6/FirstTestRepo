@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 import openpyxl
 from openpyxl.styles import Alignment
+import copy
 
 # Directory path where the excel files are located
 directory_path = "path/to/directory"
@@ -33,9 +34,7 @@ for filename in os.listdir(directory_path):
             for row in source_sheet.iter_rows():
                 for cell in row:
                     new_cell = new_sheet.cell(row=cell.row, column=cell.column, value=cell.value)
-                    new_cell.alignment = Alignment(
-                        **cell.alignment.__dict__
-                    )  # Create a new Alignment object with the same attributes
+                    new_cell.alignment = copy.copy(cell.alignment)
 
             # Adjust row height to fit content
             for row in new_sheet.iter_rows():
