@@ -34,10 +34,36 @@ for filename in os.listdir(directory):
 
                     # Copy the cell's style
                     if cell.has_style:
-                        new_cell.font = Font.from_tuple(cell.font)
-                        new_cell.fill = PatternFill(start_color=cell.fill.start_color, end_color=cell.fill.end_color, fill_type=cell.fill.fill_type)
-                        new_cell.border = Border.from_dict(cell.border)
-                        new_cell.alignment = Alignment.from_dict(cell.alignment)
+                        new_cell.font = Font(name=cell.font.name,
+                                             size=cell.font.size,
+                                             bold=cell.font.bold,
+                                             italic=cell.font.italic,
+                                             vertAlign=cell.font.vertAlign,
+                                             underline=cell.font.underline,
+                                             strike=cell.font.strike,
+                                             color=cell.font.color)
+
+                        new_cell.fill = PatternFill(fill_type=cell.fill.fill_type,
+                                                    fgColor=cell.fill.fgColor,
+                                                    bgColor=cell.fill.bgColor)
+
+                        new_cell.border = Border(left=cell.border.left,
+                                                 right=cell.border.right,
+                                                 top=cell.border.top,
+                                                 bottom=cell.border.bottom,
+                                                 diagonal=cell.border.diagonal,
+                                                 diagonal_direction=cell.border.diagonal_direction,
+                                                 outline=cell.border.outline,
+                                                 vertical=cell.border.vertical,
+                                                 horizontal=cell.border.horizontal)
+
+                        new_cell.alignment = Alignment(horizontal=cell.alignment.horizontal,
+                                                       vertical=cell.alignment.vertical,
+                                                       text_rotation=cell.alignment.text_rotation,
+                                                       wrap_text=cell.alignment.wrap_text,
+                                                       shrink_to_fit=cell.alignment.shrink_to_fit,
+                                                       indent=cell.alignment.indent)
+
                         new_cell.number_format = cell.number_format
 
             # Rename the new sheet to the file name
