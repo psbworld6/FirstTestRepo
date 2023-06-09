@@ -66,5 +66,19 @@ for filename in os.listdir(directory_path):
             # Close the source workbook
             source_workbook.close()
 
-            # Add the sheet name to the list
-            sheet_names.append(month_year
+                      # Add the sheet name to the list
+            sheet_names.append(month_year_formatted)
+
+        except ValueError:
+            continue
+
+# Sort the sheet names based on the month and year
+sorted_sheet_names = sorted(sheet_names, key=lambda x: datetime.strptime(x, '%B%Y'))
+
+# Rearrange the sheets in the consolidated workbook based on the sorted order
+consolidated_workbook._sheets.sort(key=lambda x: sorted_sheet_names.index(x.title))
+
+# Save the consolidated workbook
+consolidated_workbook.save(os.path.join(directory_path, "consolidated_reports.xlsx"))
+consolidated_workbook.close()
+
