@@ -10,6 +10,7 @@ Sub GetConditionalFormattingCode()
     code = ""
     
     ' Loop through each conditional formatting rule in the range
+    On Error Resume Next
     For Each cfRule In rng.FormatConditions
         ' Check if the rule is a unique values rule
         If cfRule.Type = xlUniqueValues Then
@@ -25,6 +26,7 @@ Sub GetConditionalFormattingCode()
             Exit For
         End If
     Next cfRule
+    On Error GoTo 0
     
     ' Display the conditional formatting code
     MsgBox code
