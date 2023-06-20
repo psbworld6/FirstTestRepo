@@ -1,27 +1,31 @@
 Sub GetConditionalFormattingCode()
     Dim rng As Range
     Dim cfRule As FormatCondition
-    Dim i As Integer
+    Dim code As String
     
     ' Set the range to the selected range in the active sheet
     Set rng = Selection
+    
+    ' Initialize the code string
+    code = ""
     
     ' Loop through each conditional formatting rule in the range
     For Each cfRule In rng.FormatConditions
         ' Check if the rule is a unique values rule
         If cfRule.Type = xlUniqueValues Then
-            ' Print the conditional formatting code to the immediate window
-            Debug.Print "With rng.FormatConditions(" & i + 1 & ")"
-            Debug.Print "    .Type = xlUniqueValues"
-            Debug.Print "    .DupeUnique = xlDuplicate"
-            Debug.Print "    .Interior.Color = RGB(255, 253, 208)"
-            Debug.Print "    .Font.Color = RGB(255, 0, 0)"
-            Debug.Print "End With"
+            ' Append the conditional formatting code to the string
+            code = code & "With rng.FormatConditions(" & rng.FormatConditions.Count & ")" & vbNewLine
+            code = code & "    .Type = xlUniqueValues" & vbNewLine
+            code = code & "    .DupeUnique = xlDuplicate" & vbNewLine
+            code = code & "    .Interior.Color = RGB(255, 253, 208)" & vbNewLine
+            code = code & "    .Font.Color = RGB(255, 0, 0)" & vbNewLine
+            code = code & "End With" & vbNewLine
             
             ' Exit the loop after finding the first unique values rule
             Exit For
         End If
-        
-        i = i + 1
     Next cfRule
+    
+    ' Display the conditional formatting code
+    MsgBox code
 End Sub
