@@ -1,0 +1,24 @@
+Sub ApplyConditionalFormatting()
+    Dim ws As Worksheet
+    Dim rng As Range
+    Dim col As Range
+
+    ' Loop through all sheets in the workbook
+    For Each ws In ThisWorkbook.Sheets
+        ' Set the range to columns F to O in the current sheet
+        Set rng = ws.Range("F:O")
+        
+        ' Clear any existing conditional formatting rules
+        rng.FormatConditions.Delete
+        
+        ' Loop through each column in the range
+        For Each col In rng.Columns
+            ' Create a new conditional formatting rule for unique values
+            With col.FormatConditions.AddUniqueValues
+                .DupeUnique = xlDuplicate
+                .Interior.Color = RGB(255, 253, 208) ' Cream background
+                .Font.Color = RGB(255, 0, 0) ' Red font color
+            End With
+        Next col
+    Next ws
+End Sub
