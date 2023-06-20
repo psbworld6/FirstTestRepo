@@ -1,27 +1,18 @@
 Sub GetConditionalFormattingCode()
     Dim rng As Range
-    Dim rule As FormatCondition
-    Dim formula As String
+    Dim cfRule As FormatCondition
     Dim i As Integer
     
     ' Set the range to the selected range in the active sheet
     Set rng = Selection
     
     ' Loop through each conditional formatting rule in the range
-    For Each rule In rng.FormatConditions
+    For Each cfRule In rng.FormatConditions
         ' Check if the rule is a unique values rule
-        If rule.Type = xlUniqueValues Then
-            ' Get the formula used in the rule
-            formula = rule.Formula1
-            
-            ' Remove the "=" sign from the formula
-            If Left(formula, 1) = "=" Then
-                formula = Mid(formula, 2)
-            End If
-            
+        If cfRule.Type = xlUniqueValues Then
             ' Print the conditional formatting code to the immediate window
-            Debug.Print "With rng.FormatConditions.AddUniqueValues"
-            Debug.Print "    .Formula1 = """ & formula & """"
+            Debug.Print "With rng.FormatConditions(" & i + 1 & ")"
+            Debug.Print "    .Type = xlUniqueValues"
             Debug.Print "    .DupeUnique = xlDuplicate"
             Debug.Print "    .Interior.Color = RGB(255, 253, 208)"
             Debug.Print "    .Font.Color = RGB(255, 0, 0)"
@@ -30,5 +21,7 @@ Sub GetConditionalFormattingCode()
             ' Exit the loop after finding the first unique values rule
             Exit For
         End If
-    Next rule
+        
+        i = i + 1
+    Next cfRule
 End Sub
