@@ -1,0 +1,36 @@
+Sub ApplyMacroToFilesInDirectory()
+    Dim MyPath As String
+    Dim MyFile As String
+    
+    ' Set the directory path where the Excel files are located
+    MyPath = "C:\Your\Directory\Path\"
+    
+    ' Specify the file extension of the Excel files to be processed
+    MyFile = Dir(MyPath & "*.xls*")
+    
+    ' Disable screen updates and alerts to optimize performance
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    
+    ' Loop through each Excel file in the directory
+    Do While MyFile <> ""
+        ' Open the Excel file
+        Workbooks.Open Filename:=MyPath & MyFile
+        
+        ' Call the macro to apply the desired code
+        ' Replace "YourMacroName" with the actual name of your macro
+        Call YourMacroName
+        
+        ' Save and close the Excel file
+        ActiveWorkbook.Close SaveChanges:=True
+        
+        ' Move to the next Excel file
+        MyFile = Dir
+    Loop
+    
+    ' Enable screen updates and alerts
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+    
+    MsgBox "Macro applied to all files in the directory."
+End Sub
