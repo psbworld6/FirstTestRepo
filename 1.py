@@ -4,8 +4,8 @@ import xlwings as xw
 # Path to the directory containing .xlsx files
 directory = '/path/to/directory'
 
-# Path to the .bas file
-bas_file_path = '/path/to/macro.bas'
+# Name of the VBA macro to run
+macro_name = 'MacroName'
 
 # Iterate over each file in the directory
 for filename in os.listdir(directory):
@@ -16,12 +16,8 @@ for filename in os.listdir(directory):
         app = xw.App(visible=False)
         workbook = app.books.open(file_path)
 
-        # Load the .bas file content
-        with open(bas_file_path, 'r') as bas_file:
-            bas_code = bas_file.read()
-
-        # Run the VBA code
-        workbook.api.Application.Run(bas_code)
+        # Run the VBA macro
+        workbook.macro(macro_name).run()
 
         # Save and close the workbook
         workbook.save()
